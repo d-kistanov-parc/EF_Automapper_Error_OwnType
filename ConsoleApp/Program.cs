@@ -4,15 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
-await using var db = new DomainContext();
+using var db = new DomainContext();
 db.Database.EnsureCreated();
 
 var request = new Request
-{ 
-    Info = new RequestInfo
-    {
-        Text = "AnyText"
-    } 
+{
+    Info = new RequestInfo { Text = "AnyText" }
 };
 
 db.Add(request);
@@ -21,7 +18,7 @@ db.SaveChanges();
 var resultByEf = db.Requests.Single(x => x.Id == request.Id);
 
 Console.WriteLine($"By original request: {resultByEf.Info?.Text}");
-// By original request: AnyText*/
+// By original request: AnyText
 
 var config = new MapperConfiguration(cfg => cfg.CreateMap<Request, RequestDto>());
 
@@ -31,7 +28,7 @@ var resultByAutoMapper = db.Requests
     .Single(x => x.Id == request.Id);
 
 Console.WriteLine($"By automapper request: {resultByAutoMapper.Info?.Text}");
-// By automapper request: 
+// By automapper request: AnyText ??????
 
 Console.ReadKey();
 
@@ -42,7 +39,7 @@ public class DomainContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=DomainContext;Trusted_Connection=True");
+        optionsBuilder.UseNpgsql(@"Server=localhost;Port=5432;Database=DomainContext;User ID=postgres;Password=password;");
     }
 }
 
@@ -54,7 +51,7 @@ public class Request
 
 [Owned]
 public class RequestInfo
-{ 
+{
     public string Text { get; set; }
     public string Number { get; set; }
 }
